@@ -116,5 +116,7 @@
     <script src="{{ asset('js/layout1.js') }}"></script>
 
     @yield('scripts') 
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

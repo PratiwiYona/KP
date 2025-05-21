@@ -71,90 +71,83 @@
         </div>
     </div>
 
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editModalBS" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title" id="editModalLabel">Edit Update Mobil</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editForm" method="POST" action="{{ route('stokmanual.update', $item->id_mobil) }}">
+    <script>
+        function openEditModal(item) {
+            if (!item || !item.id_mobil) {
+                Swal.fire('Error', 'Data tidak valid', 'error');
+                return;
+            }
+
+            // Siapkan nilai keterangan dan kode parkir
+            let kodeParkir = '';
+            if (item.latestStatusMobil && item.latestStatusMobil.kode_parkir) {
+                kodeParkir = item.latestStatusMobil.kode_parkir;
+            } else if (item.kode_parkir) {
+                kodeParkir = item.kode_parkir;
+            }
+            kodeParkir = kodeParkir !== '-' ? kodeParkir : '';
+
+            let keteranganValue = '';
+            if (item.latestKeteranganMobil?.keterangan?.keterangan) {
+                keteranganValue = item.latestKeteranganMobil.keterangan.keterangan;
+            } else if (item.keterangan) {
+                keteranganValue = item.keterangan;
+            }
+
+            Swal.fire({
+                title: 'Edit Update Mobil',
+                html: `
+                    <form id="editForm" method="POST" action="/stokmanual/${item.id_mobil}">
                         @csrf
                         @method('PUT')
-                        <input type="hidden" id="editIdKondisi" name="id_kondisi">
-
-                        <div class="mb-3">
+                        <input type="hidden" id="editIdKondisi" name="id_kondisi" value="${item.id_kondisi || ''}">
+                        
+                        <div class="mb-3 text-start">
                             <label for="editKeterangan" class="form-label">Keterangan:</label>
                             <select id="editKeterangan" name="keterangan" class="form-select">
-                                <option value="Sudah Diperbaiki">Sudah Diperbaiki</option>
-                                <option value="Parkir">Parkir</option>
-                                <option value="Defect">Defect</option>
+                                <option value="Sudah Diperbaiki" ${keteranganValue === 'Sudah Diperbaiki' ? 'selected' : ''}>Sudah Diperbaiki</option>
+                                <option value="Parkir" ${keteranganValue === 'Parkir' ? 'selected' : ''}>Parkir</option>
+                                <option value="Defect" ${keteranganValue === 'Defect' ? 'selected' : ''}>Defect</option>
                             </select>
                         </div>
-
-                        <div class="mb-3">
+                        
+                        <div class="mb-3 text-start">
                             <label for="editKodeParkir" class="form-label">Kode Parkir:</label>
-                            <input type="text" class="form-control" id="editKodeParkir" name="kode_parkir">
-                        </div>
-
-                        <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-success">Simpan Perubahan</button>
+                            <input type="text" class="form-control" id="editKodeParkir" name="kode_parkir" value="${kodeParkir}">
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Old Edit Modal (Hidden) - Keep for compatibility -->
-    <div id="editModal" style="display:none;">
-        <!-- This is kept for compatibility with the existing JavaScript -->
-    </div>
-    <div id="overlay" style="display:none;"></div>
-
-    <!-- Bootstrap JS -->
-    <script>
-        // Keep original functions for compatibility
-        function openEditModal(item) {
-            // Instead of showing the old modal, trigger the Bootstrap modal
-            const editModal = new bootstrap.Modal(document.getElementById('editModalBS'));
-            
-            // Populate form fields with data
-            document.getElementById('editIdKondisi').value = item ? item.id_kondisi : '';
-            document.getElementById('editKodeParkir').value = item && item.kode_parkir ? item.kode_parkir : '';
-            
-            if (item && item.keterangan) {
-                const select = document.getElementById('editKeterangan');
-                for (let i = 0; i < select.options.length; i++) {
-                    if (select.options[i].value === item.keterangan) {
-                        select.selectedIndex = i;
-                        break;
-                    }
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan Perubahan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                focusConfirm: false,
+                customClass: {
+                    container: 'my-swal'
+                },
+                preConfirm: () => {
+                    // Submit form
+                    document.getElementById('editForm').submit();
                 }
-            }
-
-            // Set form action URL if item exists
-            if (item && item.id_mobil) {
-                document.getElementById('editForm').action = `/stokmanual/${item.id_mobil}`;
-            } else {
-                console.error('ID Mobil tidak ditemukan untuk item:', item);
-                alert('Data tidak valid. Silakan coba lagi.');
-            }
-            
-            editModal.show();
-        }
-
-        function closeEditModal() {
-            // This function remains for compatibility but uses Bootstrap's modal hiding
-            const editModalEl = document.getElementById('editModalBS');
-            const editModal = bootstrap.Modal.getInstance(editModalEl);
-            if (editModal) {
-                editModal.hide();
-            }
+            });
         }
     </script>
+
+    <!-- CSS untuk styling form di dalam SweetAlert -->
+    <style>
+        .my-swal {
+            z-index: 99999;
+        }
+        
+        .my-swal .form-label {
+            float: left;
+        }
+        
+        .my-swal .form-control,
+        .my-swal .form-select {
+            margin-bottom: 1rem;
+        }
+    </style>
 </div>
 @endsection

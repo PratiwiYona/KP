@@ -80,100 +80,82 @@
         </div>
     </div>
 
-    <!-- Bootstrap Edit Modal -->
-    <div class="modal fade" id="editModalBS" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title" id="editModalLabel">Edit Kondisi Mobil</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editForm" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" id="editIdKondisi" name="editIdKondisi">
-                        
-                        <div class="mb-3">
-                            <label for="editCatatanDefect" class="form-label">Catatan Defect:</label>
-                            <textarea class="form-control" id="editCatatanDefect" name="catatan_defect" rows="3"></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="editTanggalMasukBengkel" class="form-label">Tanggal Masuk Bengkel:</label>
-                            <input type="date" class="form-control" id="editTanggalMasukBengkel" name="tanggal_masuk_bengkel">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="editTanggalKeluarBengkel" class="form-label">Tanggal Keluar Bengkel:</label>
-                            <input type="date" class="form-control" id="editTanggalKeluarBengkel" name="tanggal_keluar_bengkel">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="editKlaimWarranty" class="form-label">Klaim Warranty:</label>
-                            <textarea class="form-control" id="editKlaimWarranty" name="klaim_warranty" rows="3"></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="editUpdateKondisiUnit" class="form-label">Update Kondisi Unit:</label>
-                            <select class="form-select" id="editUpdateKondisiUnit" name="update_kondisi_unit">
-                                <option value="Maintenance">Maintenance</option>
-                                <option value="Sudah Diperbaiki">Sudah Diperbaiki</option>
-                            </select>
-                        </div>
-                        
-                        <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-success">Simpan Perubahan</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Keep original modal for compatibility -->
-    <div id="editModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border:1px solid #ccc; z-index:1000;">
-        <!-- This is kept empty for compatibility with existing JavaScript -->
-    </div>
-    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;" onclick="closeEditModal()"></div>
-
     <script>
         function openEditModal(problem) {
-            // Instead of showing the original modal, trigger the Bootstrap modal
-            const editModal = new bootstrap.Modal(document.getElementById('editModalBS'));
-            
-            // Populate form fields with data
-            document.getElementById('editIdKondisi').value = problem.id_kondisi;
-            document.getElementById('editCatatanDefect').value = problem.catatan_defect || '';
-            document.getElementById('editTanggalMasukBengkel').value = problem.tanggal_masuk_bengkel || '';
-            document.getElementById('editTanggalKeluarBengkel').value = problem.tanggal_keluar_bengkel || '';
-            document.getElementById('editKlaimWarranty').value = problem.klaim_warranty || '';
-            document.getElementById('editUpdateKondisiUnit').value = problem.update_kondisi_unit || 'Maintenance';
-
-            // Set form action URL
-            document.getElementById('editForm').action = '/unitproblem/' + problem.id_kondisi;
-            
-            // Show the Bootstrap modal
-            editModal.show();
-            
-            // Also update the original modal (keeping for compatibility)
-            document.getElementById('editModal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
-
-        function closeEditModal() {
-            // Close both the original and Bootstrap modals
-            document.getElementById('editModal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-            
-            // Close Bootstrap modal if it exists
-            const editModalEl = document.getElementById('editModalBS');
-            const editModal = bootstrap.Modal.getInstance(editModalEl);
-            if (editModal) {
-                editModal.hide();
+            if (!problem || !problem.id_kondisi) {
+                Swal.fire('Error', 'Data tidak valid', 'error');
+                return;
             }
+
+            Swal.fire({
+                title: 'Edit Kondisi Mobil',
+                html: `
+                    <form id="editForm" method="POST" action="/unitproblem/${problem.id_kondisi}">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" id="editIdKondisi" name="editIdKondisi" value="${problem.id_kondisi}">
+                        
+                        <div class="mb-3 text-start">
+                            <label for="editCatatanDefect" class="form-label">Catatan Defect:</label>
+                            <textarea class="form-control" id="editCatatanDefect" name="catatan_defect" rows="3">${problem.catatan_defect || ''}</textarea>
+                        </div>
+                        
+                        <div class="mb-3 text-start">
+                            <label for="editTanggalMasukBengkel" class="form-label">Tanggal Masuk Bengkel:</label>
+                            <input type="date" class="form-control" id="editTanggalMasukBengkel" name="tanggal_masuk_bengkel" value="${problem.tanggal_masuk_bengkel || ''}">
+                        </div>
+                        
+                        <div class="mb-3 text-start">
+                            <label for="editTanggalKeluarBengkel" class="form-label">Tanggal Keluar Bengkel:</label>
+                            <input type="date" class="form-control" id="editTanggalKeluarBengkel" name="tanggal_keluar_bengkel" value="${problem.tanggal_keluar_bengkel || ''}">
+                        </div>
+                        
+                        <div class="mb-3 text-start">
+                            <label for="editKlaimWarranty" class="form-label">Klaim Warranty:</label>
+                            <textarea class="form-control" id="editKlaimWarranty" name="klaim_warranty" rows="3">${problem.klaim_warranty || ''}</textarea>
+                        </div>
+                        
+                        <div class="mb-3 text-start">
+                            <label for="editUpdateKondisiUnit" class="form-label">Update Kondisi Unit:</label>
+                            <select class="form-select" id="editUpdateKondisiUnit" name="update_kondisi_unit">
+                                <option value="Maintenance" ${problem.update_kondisi_unit === 'Maintenance' ? 'selected' : ''}>Maintenance</option>
+                                <option value="Sudah Diperbaiki" ${problem.update_kondisi_unit === 'Sudah Diperbaiki' ? 'selected' : ''}>Sudah Diperbaiki</option>
+                            </select>
+                        </div>
+                    </form>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan Perubahan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                customClass: {
+                    container: 'my-swal'
+                },
+                preConfirm: () => {
+                    document.getElementById('editForm').submit();
+                }
+            });
         }
     </script>
+
+    <style>
+        .my-swal {
+            z-index: 99999;
+        }
+        
+        .my-swal .form-label {
+            float: left;
+        }
+        
+        .my-swal .form-control,
+        .my-swal .form-select {
+            margin-bottom: 0.5rem;
+        }
+
+        .my-swal textarea {
+            min-height: 100px;
+        }
+    </style>
 </div>
 @endsection
